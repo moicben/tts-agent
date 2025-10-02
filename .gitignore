@@ -21,8 +21,8 @@ models/**
 *.onnx
 
 # Audio généré ou segments mergés
-segments/*.m4a
-segments/merged.m4a
+#segments/*.m4a
+#segments/merged.m4a
 
 # Logs et artefacts
 *.log
