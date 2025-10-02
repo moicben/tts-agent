@@ -1,0 +1,14 @@
+{
+  "records": [
+    { "id": "Bonjour", "path": "segments/bonjour.m4a", "intent": "salutation" },
+    { "id": "Test_son", "path": "segments/test_son.m4a", "intent": "verifier audio" },
+    { "id": "Raison_rdv", "path": "segments/raison_rdv.m4a", "intent": "explication rdv Calendly" },
+    { "id": "Presentez_vous", "path": "segments/presentez_vous.m4a", "intent": "demander presentation" },
+    { "id": "Merci_presentation", "path": "segments/merci_presentation.m4a", "intent": "remercier presentation" },
+    { "id": "Demande_email", "path": "segments/demande_email.m4a", "intent": "demander email" },
+    { "id": "Invitation_done", "path": "segments/invitation_done.m4a", "intent": "confirmer invitation" },
+    { "id": "Rassurer_carte", "path": "segments/rassurer_carte.m4a", "intent": "rassurer carte bancaire" }
+  ]
+}
+
+

@@ -1,0 +1,33 @@
+# Environnements virtuels
+.venv/
+venv/
+env/
+.env
+
+# MacOS
+.DS_Store
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Modèles/poids volumineux
+models/**
+*.pth
+*.bin
+*.onnx
+
+# Audio généré ou segments mergés
+segments/*.m4a
+segments/merged.m4a
+
+# Logs et artefacts
+*.log
+*.tmp
+*.cache
+.env
+
+
