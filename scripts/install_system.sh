@@ -7,7 +7,23 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 export DEBIAN_FRONTEND=noninteractive
-apt-get update
+
+# Mise à jour avec tolérance aux dépôts PPA cassés (ex: deadsnakes sur certaines images)
+if ! apt-get update; then
+  echo "[WARN] apt-get update a échoué. Tentative de neutralisation des PPAs problématiques…"
+  for f in /etc/apt/sources.list.d/*.list; do
+    [[ -e "$f" ]] || continue
+    if grep -qiE 'deadsnakes|launchpadcontent' "$f"; then
+      echo "  - Désactivation: $f"
+      sed -i 's/^deb /# deb /g' "$f" || true
+    fi
+  done
+  # Moderniser les sources si disponible
+  if command -v apt >/dev/null 2>&1; then
+    apt modernize-sources || true
+  fi
+  apt-get update
+fi
 apt-get install -y --no-install-recommends \
   pulseaudio pulseaudio-utils alsa-utils pavucontrol \
   ffmpeg sox \
