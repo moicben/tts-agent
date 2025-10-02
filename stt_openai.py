@@ -1,4 +1,5 @@
 import io
+import os
 import time
 import wave
 import queue
@@ -40,6 +41,14 @@ def record_until_silence(
     Heuristique simple: démarre quand le niveau RMS dépasse le seuil,
     s'arrête après un certain temps de silence.
     """
+    # Paramètres dynamiques via env: INPUT_SAMPLE_RATE_HZ et périphérique d'entrée
+    try:
+        env_sr = int(os.getenv("INPUT_SAMPLE_RATE_HZ", ""))
+        if env_sr > 0:
+            sample_rate_hz = env_sr
+    except Exception:
+        pass
+
     channels = 1
     block_size = 1024
     started = False
@@ -61,12 +70,41 @@ def record_until_silence(
         mono = indata[:, 0] if indata.ndim == 2 else indata
         q.put_nowait(mono.copy())
 
+    # Résolution optionnelle du périphérique d'entrée depuis env
+    # Essaye dans l'ordre: SD_INPUT_DEVICE, PULSE_SOURCE, PULSE_SOURCE_NAME
+    input_device_name = (
+        os.getenv("SD_INPUT_DEVICE")
+        or os.getenv("PULSE_SOURCE")
+        or os.getenv("PULSE_SOURCE_NAME")
+        or ""
+    )
+
+    device_arg = None
+    try:
+        if input_device_name:
+            devices = sd.query_devices()
+            name_lc = input_device_name.lower()
+            # On privilégie les devices avec canaux d'entrée > 0
+            for idx, dev in enumerate(devices):
+                try:
+                    if dev.get("max_input_channels", 0) <= 0:
+                        continue
+                    dev_name = str(dev.get("name", "")).lower()
+                    if name_lc in dev_name:
+                        device_arg = idx
+                        break
+                except Exception:
+                    continue
+    except Exception:
+        device_arg = None
+
     with sd.InputStream(
         samplerate=sample_rate_hz,
         channels=channels,
         dtype="float32",
         blocksize=block_size,
         callback=cb,
+        device=device_arg,
     ):
         blocks_seen = 0
         start_time = time.time()

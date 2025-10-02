@@ -7,6 +7,8 @@ import re
 import json
 from pathlib import Path
 from typing import Optional, Dict, Any, List
+import os
+import shutil
 
 from stt_openai import record_until_silence, transcribe_wave
 from openai import OpenAI
@@ -56,14 +58,45 @@ def load_manifest(manifest_path: Path) -> Dict[str, Any]:
 
 def play_audio(filepath: Path) -> None:
     """
-    Lecture simple d'un fichier audio (m4a/mp3/etc.) via `afplay` sur macOS.
+    Lecture multi-plateforme d'un fichier audio.
+    - macOS: afplay
+    - Linux: ffplay (PulseAudio) si dispo, sinon sox/play
     """
-    try:
-        subprocess.run(["afplay", str(filepath)], check=True)
-    except FileNotFoundError:
-        print("Erreur: 'afplay' est introuvable. Sur macOS, il devrait être présent par défaut.")
-    except subprocess.CalledProcessError:
-        print("Erreur: impossible de lire le fichier avec 'afplay'.")
+    path_str = str(filepath)
+    # macOS
+    if shutil.which("afplay"):
+        try:
+            subprocess.run(["afplay", path_str], check=True)
+            return
+        except Exception:
+            pass
+
+    # Linux/others: préférer ffplay avec PulseAudio
+    if shutil.which("ffplay"):
+        env = os.environ.copy()
+        # Respecte PULSE_SINK si défini (diriger vers agent_output)
+        # Rééchantillonne à 48k mono pour WebRTC
+        cmd = [
+            "ffplay", "-hide_banner", "-loglevel", "error",
+            "-nodisp", "-autoexit",
+            "-af", "aresample=48000,pan=mono|c0=c0"
+        ]
+        cmd.append(path_str)
+        try:
+            subprocess.run(cmd, check=True, env=env)
+            return
+        except Exception:
+            pass
+
+    # Fallback: sox/play
+    if shutil.which("play"):
+        try:
+            subprocess.run(["play", "-q", path_str], check=True)
+            return
+        except Exception:
+            pass
+
+    print("Erreur: aucun lecteur audio disponible (afplay/ffplay/play). Installez ffmpeg ou sox.")
 
 
 def play_record(record_id: str, id_to_path: Dict[str, str]) -> bool:

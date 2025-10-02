@@ -1,0 +1,19 @@
+[Unit]
+Description=TTS Agent (Whisper + Coqui) - User Service
+After=default.target
+
+[Service]
+Type=simple
+Environment=OPENAI_API_KEY=%E{OPENAI_API_KEY}
+Environment=PULSE_SOURCE=meet_output.monitor
+Environment=PULSE_SINK=agent_output
+Environment=INPUT_SAMPLE_RATE_HZ=16000
+Environment=OUTPUT_SAMPLE_RATE_HZ=48000
+WorkingDirectory=%h/tts-agent
+ExecStart=%h/tts-agent/.venv/bin/python talk.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target
+
