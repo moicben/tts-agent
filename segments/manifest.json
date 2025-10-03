@@ -8,7 +8,7 @@
     { "id": "Demande_email", "path": "segments/demande_email.m4a", "intent": "demander email" },
     { "id": "Invitation_done", "path": "segments/invitation_done.m4a", "intent": "confirmer invitation" },
     { "id": "Rassurer_carte", "path": "segments/rassurer_carte.m4a", "intent": "rassurer carte bancaire" }
-  ]
+  ] 
 }
 
 
