@@ -56,6 +56,11 @@ def main() -> None:
             data, _ = stream.read(BLOCK_FRAMES)
             try:
                 os.write(fifo_fd, data)
+            except BlockingIOError:
+                # Le lecteur (module-pipe-source) n'a pas encore de client ou le tampon est plein
+                # On attend brièvement et on réessaie
+                time.sleep(0.02)
+                continue
             except BrokenPipeError:
                 try:
                     os.close(fifo_fd)
